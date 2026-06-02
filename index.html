@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>レッサーパンダ威嚇隊</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="game-shell">
+      <section class="hud" aria-label="ゲーム情報">
+        <div>
+          <p class="eyebrow">2D gag game prototype</p>
+          <h1>レッサーパンダ威嚇隊</h1>
+        </div>
+        <div class="stats">
+          <button id="levelRewardButton" class="stat-button" type="button">レベル <strong id="level">1</strong></button>
+          <span>経験値 <strong id="experience">0/100</strong></span>
+          <span>スキルポイント <strong id="skillPoints">0</strong></span>
+          <span>レパンPT <strong id="lepanPt">5/5</strong></span>
+          <span>移動速度 <strong id="moveSpeed">x1.2</strong></span>
+          <span>威嚇成功 <strong id="scareCount">0</strong></span>
+          <span>残り人間 <strong id="humanCount">0</strong></span>
+          <div class="sound-controls" aria-label="効果音設定">
+            <button id="soundToggleButton" class="sound-toggle-button" type="button">サウンドON</button>
+            <button id="settingsButton" class="sound-toggle-button" type="button">設定</button>
+          </div>
+          <div id="developerControls" class="developer-controls" hidden>
+            <button id="developerModeButton" class="developer-mode-button" type="button">DEV OFF</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="play-area" aria-label="ゲーム画面">
+        <canvas id="game" width="960" height="540" aria-label="町を移動するレッサーパンダのゲーム"></canvas>
+        <div id="toast" class="toast" aria-live="polite">矢印キー / WASD で町を移動</div>
+      </section>
+
+      <section class="controls" aria-label="操作">
+        <div class="dpad" aria-label="移動ボタン">
+          <button class="move-btn up" data-move="up" aria-label="上へ移動">▲</button>
+          <button class="move-btn left" data-move="left" aria-label="左へ移動">◀</button>
+          <button class="move-btn down" data-move="down" aria-label="下へ移動">▼</button>
+          <button class="move-btn right" data-move="right" aria-label="右へ移動">▶</button>
+        </div>
+        <div class="action-panel">
+          <div class="primary-actions">
+            <button id="scareButton" class="scare-button" type="button">威嚇！</button>
+            <button id="skillButton" class="menu-button" type="button">スキル</button>
+            <button id="gachaButton" class="menu-button" type="button">ガチャ</button>
+            <button id="skinButton" class="menu-button" type="button">スキン</button>
+            <button id="adButton" class="menu-button" type="button">広告を見る（仮）</button>
+            <button id="shopButton" class="menu-button" type="button">課金ショップ（仮）</button>
+          </div>
+          <div id="learnedSkills" class="learned-skills" aria-label="セット中の技"></div>
+        </div>
+        <p class="hint">近くの人間に向かって威嚇すると、可愛さに耐えきれずきゅん状態になります。</p>
+      </section>
+    </main>
+
+    <div id="skillModal" class="modal" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal></div>
+      <section class="skill-menu" role="dialog" aria-modal="true" aria-labelledby="skillMenuTitle">
+        <div class="skill-menu-header">
+          <div>
+            <p class="eyebrow">skill shop</p>
+            <h2 id="skillMenuTitle">スキル一覧</h2>
+          </div>
+          <button class="close-button" type="button" data-close-modal aria-label="閉じる">×</button>
+        </div>
+        <p class="skill-point-line">現在のスキルポイント <strong id="modalSkillPoints">0</strong></p>
+        <div id="upgradeList" class="skill-list upgrade-list"></div>
+        <div id="skillList" class="skill-list"></div>
+      </section>
+    </div>
+
+    <div id="levelRewardModal" class="modal" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal></div>
+      <section class="skill-menu" role="dialog" aria-modal="true" aria-labelledby="levelRewardTitle">
+        <div class="skill-menu-header">
+          <div>
+            <p class="eyebrow">level rewards</p>
+            <h2 id="levelRewardTitle">レベル報酬</h2>
+          </div>
+          <button class="close-button" type="button" data-close-modal aria-label="閉じる">×</button>
+        </div>
+        <div id="levelRewardList" class="skill-list"></div>
+      </section>
+    </div>
+
+    <div id="gachaModal" class="modal" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal></div>
+      <section class="skill-menu" role="dialog" aria-modal="true" aria-labelledby="gachaMenuTitle">
+        <div class="skill-menu-header">
+          <div>
+            <p class="eyebrow">skin gacha</p>
+            <h2 id="gachaMenuTitle">レッサーパンダガチャ</h2>
+          </div>
+          <button class="close-button" type="button" data-close-modal aria-label="閉じる">×</button>
+        </div>
+        <p class="skill-point-line">スキルPT <strong id="gachaSkillPoints">0</strong> / 進化チケット <strong id="evolutionTickets">0</strong></p>
+        <div id="gachaResult" class="gacha-result">初回50PT、通常200PT。謎の箱から謎のかわいさが出ます。</div>
+        <button id="rollGachaButton" class="gacha-roll-button" type="button">ガチャを回す</button>
+        <button id="skipGachaButton" class="gacha-skip-button" type="button" hidden>スキップ</button>
+      </section>
+    </div>
+
+    <div id="skinModal" class="modal" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal></div>
+      <section class="skill-menu" role="dialog" aria-modal="true" aria-labelledby="skinMenuTitle">
+        <div class="skill-menu-header">
+          <div>
+            <p class="eyebrow">skin closet</p>
+            <h2 id="skinMenuTitle">所持スキン</h2>
+          </div>
+          <button class="close-button" type="button" data-close-modal aria-label="閉じる">×</button>
+        </div>
+        <div id="skinList" class="skin-list"></div>
+      </section>
+    </div>
+
+    <div id="settingsModal" class="modal" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal></div>
+      <section class="skill-menu" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+        <div class="skill-menu-header">
+          <div>
+            <p class="eyebrow">sound settings</p>
+            <h2 id="settingsTitle">音声設定</h2>
+          </div>
+          <button class="close-button" type="button" data-close-modal aria-label="閉じる">×</button>
+        </div>
+        <div class="settings-list">
+          <label class="settings-row">
+            <span>BGM音量 <strong id="bgmVolumeValue">70%</strong></span>
+            <input id="bgmVolumeSlider" type="range" min="0" max="100" value="70">
+          </label>
+          <label class="settings-row">
+            <span>効果音音量 <strong id="seVolumeValue">50%</strong></span>
+            <input id="seVolumeSlider" type="range" min="0" max="100" value="50">
+          </label>
+        </div>
+      </section>
+    </div>
+
+    <div id="clearModal" class="modal" aria-hidden="true">
+      <div class="modal-backdrop"></div>
+      <section class="skill-menu" role="dialog" aria-modal="true" aria-labelledby="clearTitle">
+        <div class="skill-menu-header">
+          <div>
+            <p class="eyebrow">all clear</p>
+            <h2 id="clearTitle">全クリ</h2>
+          </div>
+        </div>
+        <p class="skill-point-line">Lv200到達。報酬を選んでください。</p>
+        <div id="clearChoice" class="skill-list">
+          <article class="skill-card">
+            <div><h3>A. 全クリ専用スキンガチャ</h3><p>専用スキンだけが出るガチャを2回引けます。</p></div>
+            <button id="clearSkinChoice" class="buy-button" type="button">選ぶ</button>
+          </article>
+          <article class="skill-card">
+            <div><h3>B. 全クリ専用スキルガチャ</h3><p>専用スキル強化が出るガチャを2回引けます。</p></div>
+            <button id="clearSkillChoice" class="buy-button" type="button">選ぶ</button>
+          </article>
+        </div>
+        <div id="clearRollArea" class="gacha-result">選択後、2回分だけ引けます。</div>
+        <button id="clearRollButton" class="gacha-roll-button" type="button" disabled>全クリガチャを引く</button>
+      </section>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
